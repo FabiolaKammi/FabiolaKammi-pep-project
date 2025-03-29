@@ -17,6 +17,7 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.get("example-endpoint", this::exampleHandler);
+        app.post("/account", this::registerAccount);
 
         return app;
     }
