@@ -6,6 +6,7 @@ import Model.Message;
 import java.util.List;
 
 public class MessageService {
+
     private MessageDAO messageDAO = new MessageDAO();
 
     public Message createMessage(Message message) {
@@ -24,22 +25,22 @@ public class MessageService {
         return messageDAO.getAllMessages();
     }
 
-    public Message getMessageById(int message_id) {
-        return messageDAO.getMessageById(message_id);
+    public Message getMessageById(int messageId) {
+        return messageDAO.getMessageById(messageId);
     }
 
-    public boolean deleteMessage(int message_id) {
-        return messageDAO.deleteMessage(message_id);
+    public Message deleteMessageById(int messageId){
+        return messageDAO.deleteMessageById(messageId);
     }
 
-    public boolean updateMessage(int message_id, String message_text) {
-        if (message_text == null || message_text.isBlank() || message_text.length() > 255) {
-            return false;
+    public Message updateMessage(int messageId, String messageText) {
+        if (messageText.isBlank() || messageText.length() > 255) {
+            return null;
         }
-        return messageDAO.updateMessage(message_id, message_text);
+        return messageDAO.updateMessage(messageId, messageText);
     }
 
-    public List<Message> getMessagesByUserId(int account_id) {
-        return messageDAO.getMessagesByUserId(account_id);
+    public List<Message> getMessagesByUserId(int accountId) {
+        return messageDAO.getMessagesByUserId(accountId);
     }
 }

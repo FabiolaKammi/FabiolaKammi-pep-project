@@ -9,6 +9,7 @@ import Service.AccountService;
 import Service.MessageService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import java.util.Map;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class SocialMediaController {
         app.post("/messages", this::createMessageHandler);
         app.get("/messages", this::getAllMessagesHandler);
         app.get("/messages/{message_id}", this::getMessageByIdHandler);
-        app.delete("/messages/{message_id}", this::deleteMessageHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageByIdHandler);
         app.patch("/messages/{message_id}", this::updateMessageHandler);
         app.get("/accounts/{account_id}/messages", this::getMessagesByUserHandler);
 
@@ -66,9 +67,12 @@ public class SocialMediaController {
             ObjectMapper mapper = new ObjectMapper();
             Message message = mapper.readValue(ctx.body(),Message.class);
 
+            System.out.println(message);
             Message createdMessage = messageService.createMessage(message);
+                System.out.println(createdMessage);
             if (createdMessage == null) {
                 ctx.status(400);
+                
             } else {
                 ctx.status(200).json(createdMessage);
             }
@@ -87,37 +91,40 @@ public class SocialMediaController {
         if (message != null) {
             ctx.json(message);
         } else {
-            ctx.status(200).result("Message not found.");
+            ctx.status(200);
         }
     }
 
-    private void deleteMessageHandler(Context ctx) {
+    private void deleteMessageByIdHandler(Context ctx) {
         int messageId = Integer.parseInt(ctx.pathParam("message_id"));
-        Message deletedMessage = messageService.getMessageById(messageId);
+        Message deletedMessage = messageService.deleteMessageById(messageId);
 
-        if (deletedMessage != null && messageService.deleteMessage(messageId)) {
-            ctx.json(deletedMessage);
+        if(deletedMessage != null){
+            ctx.json(deletedMessage).status(200);
         } else {
             ctx.status(200).result(""); // Idempotent DELETE
         }
     }
 
-    private void updateMessageHandler(Context ctx) {
+    private void updateMessageHandler(Context ctx) throws JsonProcessingException {
         int messageId = Integer.parseInt(ctx.pathParam("message_id"));
-        String newMessageText = ctx.body();
+        ObjectMapper mapper = new ObjectMapper();
+        @SuppressWarnings("unchecked")
+        Map<String, String> messageMap = mapper.readValue(ctx.body(), Map.class);
+        String messageText = messageMap.get("message_text");
 
-        boolean isUpdated = messageService.updateMessage(messageId, newMessageText);
-        if (isUpdated) {
-            Message updatedMessage = messageService.getMessageById(messageId);
-            ctx.json(updatedMessage);
+         Message updatedMessage = messageService.updateMessage(messageId, messageText);
+        if (updatedMessage != null) {
+            
+            ctx.json(updatedMessage).status(200);
         } else {
-            ctx.status(400).result("Message update failed.");
+            ctx.status(400);
         }
     }
 
     private void getMessagesByUserHandler(Context ctx) {
         int accountId = Integer.parseInt(ctx.pathParam("account_id"));
         List<Message> userMessages = messageService.getMessagesByUserId(accountId);
-        ctx.json(userMessages);
+        ctx.json(userMessages).status(200);
     }
 }
