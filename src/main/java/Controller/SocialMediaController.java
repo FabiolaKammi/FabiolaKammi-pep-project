@@ -38,15 +38,18 @@ public class SocialMediaController {
         return app;
     }
 
-    private void registerAccountHandler(Context ctx) throws JsonProcessingException {
+    private  void registerAccountHandler(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Account account = mapper.readValue(ctx.body(), Account.class);
+        @SuppressWarnings("unchecked")
+        Map<String, String> accountMap = mapper.readValue(ctx.body(), Map.class);
+        String userName = accountMap.get("username");
+        String passWord = accountMap.get("password");
 
-        Account registeredAccount = accountService.registerAccount(account);
+        Account registeredAccount = accountService.registerAccount(userName, passWord);
         if (registeredAccount != null) {
-            ctx.json(mapper.writeValueAsString(registeredAccount));
+            ctx.json(mapper.writeValueAsString(registeredAccount)).status(200);
         } else {
-            ctx.status(400).result("Account registration failed.");
+            ctx.status(400);
         }
     }
 
@@ -56,9 +59,9 @@ public class SocialMediaController {
 
         Account authenticatedAccount = accountService.login(loginAccount.getUsername(), loginAccount.getPassword());
         if (authenticatedAccount != null) {
-            ctx.json(mapper.writeValueAsString(authenticatedAccount));
+            ctx.json(authenticatedAccount).status(200);
         } else {
-            ctx.status(401).result("Login failed. Unauthorized.");
+            ctx.status(401);
         }
     }
 

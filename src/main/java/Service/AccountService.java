@@ -6,14 +6,12 @@ import Model.Account;
 public class AccountService {
     private AccountDAO accountDAO = new AccountDAO();
 
-    public Account registerAccount(Account account) {
-        if (account.getUsername() == null || account.getUsername().isBlank()) {
+    public Account registerAccount(String userName, String passWord) {
+        if (userName.isBlank() || passWord.isBlank() || passWord.length() < 4) {
             return null;
         }
-        if (account.getPassword() == null || account.getPassword().length() < 4) {
-            return null;
-        }
-        return accountDAO.registerAccount(account);
+    Account createdAccount = accountDAO.registerAccount(userName, passWord);
+        return createdAccount;
     }
 
     public Account login(String username, String password) {
